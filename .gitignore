@@ -1,0 +1,24 @@
+# SIM-TU .gitignore
+
+# Jangan commit file sensitif
+*.env
+.env.*
+secrets.json
+credentials.json
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Log files
+*.log
+
+# Temporary files
+_temp/
+tmp/
