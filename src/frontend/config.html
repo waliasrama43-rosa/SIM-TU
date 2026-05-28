@@ -1,0 +1,95 @@
+<!-- config.html — Kepala TU only -->
+<div id="configPage">
+
+  <div class="page-header">
+    <div><h2>⚙️ Konfigurasi Sistem</h2><p>Ubah pengaturan sistem tanpa menyentuh kode</p></div>
+    <button class="btn btn-secondary" onclick="loadConfig()">🔄 Refresh</button>
+  </div>
+
+  <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:12px 16px;margin-bottom:20px;font-size:13px;">
+    ⚠️ <strong>Perhatian:</strong> Perubahan di halaman ini berlaku langsung ke sistem. Pastikan nilai yang diisi sudah benar.
+    Jangan mengubah nilai pada baris <code>NO_URUT_*</code> kecuali dalam kondisi darurat.
+  </div>
+
+  <div id="configSections">
+    <div class="loading-page"><div class="loading-spinner"></div></div>
+  </div>
+
+</div>
+
+<script>
+registerPage('config', async function(container) {
+  if (!Session.isKepalaTU()) {
+    container.innerHTML = `<div class="loading-page"><p>⛔ Akses ditolak. Hanya Kepala TU.</p></div>`;
+    return;
+  }
+  container.innerHTML = document.getElementById('configPage').outerHTML;
+  await loadConfig();
+});
+
+async function loadConfig() {
+  const wrap = document.getElementById('configSections');
+  wrap.innerHTML = `<div class="loading-page"><div class="loading-spinner"></div></div>`;
+  try {
+    const res = await API.getConfig();
+    if (!res.data) { wrap.innerHTML = '<p>Gagal memuat config.</p>'; return; }
+    const sections = groupConfigSections(res.data);
+    wrap.innerHTML = sections.map(sec => `
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><span class="card-title">${escHtml(sec.title)}</span></div>
+        <div class="card-body" style="padding:0;">
+          <table style="width:100%;">
+            <thead>
+              <tr style="background:#f8fafc;">
+                <th style="padding:10px 16px;font-size:12px;color:#6b7280;width:30%;">KEY</th>
+                <th style="padding:10px 16px;font-size:12px;color:#6b7280;">VALUE</th>
+                <th style="padding:10px 16px;font-size:12px;color:#6b7280;width:30%;">KETERANGAN</th>
+                <th style="padding:10px 16px;width:80px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              ${sec.rows.map(r => `
+                <tr style="border-top:1px solid #f1f5f9;">
+                  <td style="padding:10px 16px;font-family:monospace;font-size:12px;color:#1557b0;font-weight:600;">${escHtml(r.key)}</td>
+                  <td style="padding:8px 16px;">
+                    <input type="text" class="form-control" id="cfg_${escHtml(r.key)}"
+                      value="${escHtml(String(r.value||''))}"
+                      ${r.key.startsWith('NO_URUT') ? 'style="font-family:monospace;background:#fff8f0;"' : ''}
+                      ${r.key.startsWith('---') ? 'disabled style="background:transparent;border:none;font-weight:700;"' : ''}>
+                  </td>
+                  <td style="padding:10px 16px;font-size:12px;color:#9ca3af;">${escHtml(r.keterangan||'')}</td>
+                  <td style="padding:8px 16px;">
+                    ${!r.key.startsWith('---') ? `<button class="btn btn-sm btn-primary" onclick="saveConfig('${escHtml(r.key)}')">Simpan</button>` : ''}
+                  </td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`).join('');
+  } catch(e) { Toast.error('Gagal: ' + e.message); }
+}
+
+function groupConfigSections(dataObj) {
+  const sections = [];
+  let currentSection = { title: 'Umum', rows: [] };
+  Object.entries(dataObj).forEach(([key, val]) => {
+    if (key.startsWith('---')) {
+      if (currentSection.rows.length > 0) sections.push(currentSection);
+      currentSection = { title: key.replace(/---/g,'').trim() || 'Lainnya', rows: [] };
+    } else {
+      currentSection.rows.push({ key, value: val, keterangan: '' });
+    }
+  });
+  if (currentSection.rows.length > 0) sections.push(currentSection);
+  return sections;
+}
+
+async function saveConfig(key) {
+  const input = document.getElementById(`cfg_${key}`);
+  if (!input) return;
+  const val = input.value;
+  const res = await API.setConfig(key, val);
+  if (res.success) Toast.success(`${key} diperbarui.`);
+  else Toast.error(res.message);
+}
+</script>

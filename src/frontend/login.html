@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIM-TU — Login</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: linear-gradient(135deg, #1a3c5e 0%, #0d2137 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .login-wrapper {
+      width: 100%;
+      max-width: 420px;
+      padding: 24px;
+    }
+    .login-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 40px 36px;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+    }
+    .logo-area {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+    .logo-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, #1a73e8, #0d47a1);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 28px;
+    }
+    .logo-area h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1a3c5e;
+      letter-spacing: -0.3px;
+    }
+    .logo-area p {
+      font-size: 13px;
+      color: #6b7280;
+      margin-top: 4px;
+    }
+    .form-group {
+      margin-bottom: 18px;
+    }
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+    input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #111827;
+      outline: none;
+      transition: border-color .2s;
+      background: #f9fafb;
+    }
+    input:focus {
+      border-color: #1a73e8;
+      background: #fff;
+    }
+    .btn-login {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #1a73e8, #1557b0);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s, transform .1s;
+      margin-top: 8px;
+    }
+    .btn-login:hover { opacity: .92; transform: translateY(-1px); }
+    .btn-login:active { transform: translateY(0); }
+    .btn-login:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+    .error-msg {
+      display: none;
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      color: #dc2626;
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      margin-bottom: 16px;
+    }
+    .footer-note {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .spinner {
+      display: none;
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,.4);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div class="login-wrapper">
+    <div class="login-card">
+      <div class="logo-area">
+        <div class="logo-icon">🏫</div>
+        <h1>SIM-TU</h1>
+        <p>Sistem Informasi Manajemen Tata Usaha<br>Sekolah Rakyat</p>
+      </div>
+
+      <div class="error-msg" id="errorMsg"></div>
+
+      <form id="loginForm" autocomplete="off">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="Masukkan username" required autofocus>
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Masukkan password" required>
+        </div>
+        <button type="submit" class="btn-login" id="btnLogin">
+          <span id="btnText">Masuk</span>
+          <div class="spinner" id="spinner"></div>
+        </button>
+      </form>
+
+      <div class="footer-note">
+        Sistem ini hanya untuk staf Tata Usaha yang terdaftar.<br>
+        Hubungi Kepala TU jika lupa akses.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      const errEl    = document.getElementById('errorMsg');
+      const btn      = document.getElementById('btnLogin');
+      const spinner  = document.getElementById('spinner');
+      const btnText  = document.getElementById('btnText');
+
+      errEl.style.display = 'none';
+      btn.disabled = true;
+      btnText.style.display = 'none';
+      spinner.style.display = 'block';
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          const data = JSON.parse(res);
+          btn.disabled = false;
+          btnText.style.display = 'block';
+          spinner.style.display = 'none';
+
+          if (data.success) {
+            sessionStorage.setItem('simtu_token',    data.data.token);
+            sessionStorage.setItem('simtu_username', data.data.username);
+            sessionStorage.setItem('simtu_nama',     data.data.nama);
+            sessionStorage.setItem('simtu_role',     data.data.role);
+            sessionStorage.setItem('simtu_jenjang',  data.data.jenjang);
+            google.script.run.withSuccessHandler(function(url){
+              window.top.location.href = url;
+            }).getWebAppUrl();
+          } else {
+            errEl.textContent = data.message;
+            errEl.style.display = 'block';
+          }
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          btnText.style.display = 'block';
+          spinner.style.display = 'none';
+          errEl.textContent = 'Terjadi kesalahan sistem. Coba lagi.';
+          errEl.style.display = 'block';
+        })
+        .loginUser(username, password);
+    });
+
+    // Fungsi helper yang perlu ada di Code.gs
+    // function loginUser(u,p){ return Auth.login(u,p); }
+    // function getWebAppUrl(){ return ScriptApp.getService().getUrl(); }
+  </script>
+</body>
+</html>

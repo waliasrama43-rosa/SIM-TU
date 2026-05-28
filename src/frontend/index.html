@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SIM-TU — Tata Usaha</title>
+  <link rel="stylesheet" href="assets/css/main.css">
+</head>
+<body>
+
+<!-- ===== SIDEBAR ===== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <span class="logo-icon">🏫</span>
+      <div class="logo-text">
+        <span class="logo-title">SIM-TU</span>
+        <span class="logo-sub">Tata Usaha</span>
+      </div>
+    </div>
+    <button class="sidebar-toggle" id="sidebarToggle" title="Lipat Sidebar">&#9776;</button>
+  </div>
+
+  <!-- Badge jenjang -->
+  <div class="user-badge" id="userBadge">
+    <div class="user-avatar" id="userAvatar">-</div>
+    <div class="user-info">
+      <span class="user-name" id="sidebarNama">-</span>
+      <span class="user-role" id="sidebarRole">-</span>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">MENU UTAMA</div>
+
+    <a href="#" class="nav-item active" data-page="dashboard">
+      <span class="nav-icon">📊</span>
+      <span class="nav-label">Dashboard</span>
+    </a>
+
+    <div class="nav-section-label">PERSURATAN</div>
+
+    <a href="#" class="nav-item" data-page="surat-masuk">
+      <span class="nav-icon">📥</span>
+      <span class="nav-label">Surat Masuk</span>
+      <span class="nav-badge" id="badgeSuratMasuk" style="display:none">0</span>
+    </a>
+    <a href="#" class="nav-item" data-page="surat-keluar">
+      <span class="nav-icon">📤</span>
+      <span class="nav-label">Surat Keluar</span>
+    </a>
+    <a href="#" class="nav-item" data-page="disposisi">
+      <span class="nav-icon">📋</span>
+      <span class="nav-label">Disposisi</span>
+      <span class="nav-badge" id="badgeDisposisi" style="display:none">0</span>
+    </a>
+
+    <div class="nav-section-label">KESISWAAN</div>
+
+    <a href="#" class="nav-item" data-page="kesiswaan">
+      <span class="nav-icon">🎓</span>
+      <span class="nav-label">Data Siswa</span>
+    </a>
+
+    <div class="nav-section-label admin-only" id="navAdminSection">ADMINISTRASI</div>
+
+    <a href="#" class="nav-item admin-only" data-page="template-reg" id="navTemplate">
+      <span class="nav-icon">📄</span>
+      <span class="nav-label">Template Surat</span>
+    </a>
+    <a href="#" class="nav-item admin-only" data-page="users" id="navUsers">
+      <span class="nav-icon">👥</span>
+      <span class="nav-label">Kelola User</span>
+    </a>
+    <a href="#" class="nav-item admin-only" data-page="config" id="navConfig">
+      <span class="nav-icon">⚙️</span>
+      <span class="nav-label">Konfigurasi</span>
+    </a>
+    <a href="#" class="nav-item admin-only" data-page="audit-log" id="navAudit">
+      <span class="nav-icon">🔍</span>
+      <span class="nav-label">Audit Log</span>
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="btn-logout" id="btnLogout">
+      <span>🚪</span> <span class="nav-label">Keluar</span>
+    </button>
+    <div class="app-version">v1.0.0</div>
+  </div>
+</aside>
+
+<!-- ===== MAIN AREA ===== -->
+<div class="main-wrapper" id="mainWrapper">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <button class="mobile-menu-btn" id="mobileMenuBtn">&#9776;</button>
+      <div class="breadcrumb">
+        <span id="pageTitle">Dashboard</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="topbar-jenjang" id="topbarJenjang">-</div>
+      <div class="topbar-time" id="topbarTime">-</div>
+      <div class="topbar-user" id="topbarUser">-</div>
+    </div>
+  </header>
+
+  <!-- PAGE CONTENT -->
+  <main class="page-content" id="pageContent">
+    <!-- Konten halaman dimuat secara dinamis di sini -->
+    <div class="loading-page" id="loadingPage">
+      <div class="loading-spinner"></div>
+      <p>Memuat...</p>
+    </div>
+  </main>
+
+</div>
+
+<!-- ===== MODAL OVERLAY ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box" id="modalBox">
+    <div class="modal-header">
+      <h3 id="modalTitle">Konfirmasi</h3>
+      <button class="modal-close" id="modalClose">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter">
+      <button class="btn btn-secondary" id="modalCancel">Batal</button>
+      <button class="btn btn-primary" id="modalConfirm">Ya, Lanjutkan</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== TOAST NOTIFICATION ===== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script src="assets/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,300 @@
+<!-- surat-masuk.html -->
+<div id="suratMasukPage">
+
+  <div class="page-header">
+    <div><h2>📥 Surat Masuk</h2><p>Pencatatan & arsip surat masuk digital</p></div>
+    <button class="btn btn-primary" onclick="openFormSuratMasuk()">+ Catat Surat Masuk</button>
+  </div>
+
+  <!-- FILTER -->
+  <div class="card" style="margin-bottom:20px;">
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>Kata Kunci</label>
+        <input type="text" class="filter-input" id="smFilterKata" placeholder="Perihal / pengirim...">
+      </div>
+      <div class="filter-group">
+        <label>Bulan</label>
+        <select class="filter-input" id="smFilterBulan">
+          <option value="">Semua</option>
+          <option value="1">Januari</option><option value="2">Februari</option>
+          <option value="3">Maret</option><option value="4">April</option>
+          <option value="5">Mei</option><option value="6">Juni</option>
+          <option value="7">Juli</option><option value="8">Agustus</option>
+          <option value="9">September</option><option value="10">Oktober</option>
+          <option value="11">November</option><option value="12">Desember</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Tahun</label>
+        <input type="number" class="filter-input" id="smFilterTahun" value="2026" min="2020" max="2030" style="width:90px;">
+      </div>
+      <div class="filter-group">
+        <label>Status</label>
+        <select class="filter-input" id="smFilterStatus">
+          <option value="">Semua</option>
+          <option value="BARU">Baru</option>
+          <option value="DIDISPOSISI">Didisposisi</option>
+          <option value="SELESAI">Selesai</option>
+        </select>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-primary" onclick="loadSuratMasuk()">🔍 Cari</button>
+        <button class="btn btn-secondary" onclick="resetFilterSM()">Reset</button>
+      </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-wrapper" style="border:none;border-radius:0;">
+      <table id="tableSuratMasuk">
+        <thead>
+          <tr>
+            <th>No. Agenda</th><th>Tgl Terima</th><th>No. Surat</th>
+            <th>Pengirim</th><th>Perihal</th><th>Jenjang</th>
+            <th>Status</th><th style="text-align:center;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tbodySuratMasuk">
+          <tr><td colspan="8" class="table-empty">Klik Cari untuk menampilkan data.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="padding:12px 20px;font-size:12px;color:#6b7280;border-top:1px solid #e5e7eb;" id="smCount"></div>
+  </div>
+
+  <!-- MODAL FORM CATAT SURAT MASUK -->
+  <template id="tplFormSuratMasuk">
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTabSM('upload',this)">📎 Upload Lampiran</button>
+      <button class="tab-btn" onclick="switchTabSM('manual',this)">⌨️ Input Manual</button>
+    </div>
+
+    <!-- Tab Upload -->
+    <div class="tab-panel active" id="tabUploadSM">
+      <div class="upload-zone" id="uploadZoneSM" onclick="document.getElementById('fileSuratMasuk').click()">
+        <div class="upload-zone-icon">📄</div>
+        <p>Klik atau seret file ke sini</p>
+        <p style="margin-top:6px;font-size:12px;">Mendukung: <strong>Foto (JPG/PNG)</strong> atau <strong>PDF</strong></p>
+        <p style="font-size:11px;color:#9ca3af;margin-top:4px;">Foto akan otomatis dikonversi ke PDF</p>
+      </div>
+      <input type="file" id="fileSuratMasuk" accept="image/*,application/pdf" style="display:none;" onchange="handleFileSM(this)">
+      <div id="uploadPreviewSM" style="display:none;margin-top:12px;padding:10px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;font-size:13px;">
+        ✅ File siap: <strong id="uploadFilenameSM"></strong>
+      </div>
+    </div>
+
+    <!-- Tab Manual -->
+    <div class="tab-panel" id="tabManualSM"></div>
+
+    <!-- Form Data Surat -->
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid #e5e7eb;">
+      <div class="form-grid">
+        <div class="form-group">
+          <label class="form-label">No. Surat <span class="req">*</span></label>
+          <input type="text" class="form-control" id="smNoSurat" placeholder="001/TU/V/2026">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tanggal Surat <span class="req">*</span></label>
+          <input type="date" class="form-control" id="smTglSurat">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tanggal Diterima</label>
+          <input type="date" class="form-control" id="smTglTerima">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Pengirim <span class="req">*</span></label>
+          <input type="text" class="form-control" id="smPengirim" placeholder="Dinas Pendidikan / Instansi">
+        </div>
+        <div class="form-group full">
+          <label class="form-label">Perihal <span class="req">*</span></label>
+          <input type="text" class="form-control" id="smPerihal" placeholder="Perihal surat">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Klasifikasi Arsip</label>
+          <input type="text" class="form-control" id="smKlasifikasi" placeholder="00.00">
+        </div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="Modal.close()">Batal</button>
+      <button class="btn btn-primary" id="btnSimpanSM" onclick="simpanSuratMasuk()">💾 Simpan</button>
+    </div>
+  </template>
+
+  <!-- MODAL DISPOSISI -->
+  <template id="tplDisposisi">
+    <div class="form-grid">
+      <div class="form-group full">
+        <label class="form-label">Tujuan Disposisi <span class="req">*</span></label>
+        <select class="form-control" id="dispKepada">
+          <option value="">— Pilih Penerima —</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Catatan / Instruksi</label>
+        <textarea class="form-control" id="dispCatatan" rows="3" placeholder="Catatan untuk penerima disposisi..."></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="Modal.close()">Batal</button>
+      <button class="btn btn-warning" onclick="kirimDisposisi()">📋 Kirim Disposisi</button>
+    </div>
+  </template>
+
+</div>
+
+<script>
+let _smUploadData = null;  // { base64, mimeType, nama }
+let _dispSuratId  = null;
+
+registerPage('surat-masuk', async function(container) {
+  container.innerHTML = document.getElementById('suratMasukPage').outerHTML;
+  // Set default filter bulan & tahun
+  const now = new Date();
+  document.getElementById('smFilterBulan').value = now.getMonth() + 1;
+  document.getElementById('smFilterTahun').value = now.getFullYear();
+  await loadSuratMasuk();
+});
+
+async function loadSuratMasuk() {
+  const filter = {
+    perihal  : document.getElementById('smFilterKata')?.value || '',
+    pengirim : document.getElementById('smFilterKata')?.value || '',
+    bulan    : document.getElementById('smFilterBulan')?.value || '',
+    tahun    : document.getElementById('smFilterTahun')?.value || '',
+    status   : document.getElementById('smFilterStatus')?.value || '',
+  };
+  const tbody = document.getElementById('tbodySuratMasuk');
+  tbody.innerHTML = `<tr><td colspan="8" class="table-empty"><div class="loading-spinner" style="margin:0 auto;width:24px;height:24px;"></div></td></tr>`;
+  try {
+    const res = await API.getSuratMasuk(filter);
+    document.getElementById('smCount').textContent = `${res.data?.length || 0} surat ditemukan`;
+    if (!res.data || res.data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="table-empty">Tidak ada data surat masuk.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = res.data.map(s => `
+      <tr>
+        <td><code style="font-size:11px;">${escHtml(s.noAgenda)}</code></td>
+        <td>${fmtTanggal(s.tglTerima)}</td>
+        <td style="font-size:12px;">${escHtml(s.noSurat)}</td>
+        <td>${escHtml(s.pengirim)}</td>
+        <td>${escHtml(s.perihal)}</td>
+        <td><span class="badge badge-info">${escHtml(s.jenjang)}</span></td>
+        <td>${statusBadge(s.status)}</td>
+        <td style="text-align:center;white-space:nowrap;">
+          ${s.lampiranUrl ? `<a href="${escHtml(s.lampiranUrl)}" target="_blank" class="btn btn-sm btn-secondary">📄</a>` : ''}
+          <button class="btn btn-sm btn-warning" onclick="openDisposisi('${escHtml(s.id)}')">📋</button>
+        </td>
+      </tr>`).join('');
+  } catch(e) { Toast.error('Gagal memuat: ' + e.message); }
+}
+
+function resetFilterSM() {
+  document.getElementById('smFilterKata').value   = '';
+  document.getElementById('smFilterBulan').value  = '';
+  document.getElementById('smFilterStatus').value = '';
+  loadSuratMasuk();
+}
+
+function openFormSuratMasuk() {
+  _smUploadData = null;
+  const tpl = document.getElementById('tplFormSuratMasuk');
+  Modal.open('📥 Catat Surat Masuk', tpl.innerHTML, { hideFooter: true, large: true });
+  document.getElementById('smTglTerima').value = new Date().toISOString().slice(0,10);
+  setupUploadZone();
+}
+
+function switchTabSM(tab, btn) {
+  document.querySelectorAll('#modalBody .tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('#modalBody .tab-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tabUploadSM') && (document.getElementById(tab==='upload'?'tabUploadSM':'tabManualSM').classList.add('active'));
+}
+
+function setupUploadZone() {
+  const zone = document.getElementById('uploadZoneSM');
+  if (!zone) return;
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault(); zone.classList.remove('dragover');
+    if (e.dataTransfer.files[0]) processFileSM(e.dataTransfer.files[0]);
+  });
+}
+
+function handleFileSM(input) {
+  if (input.files[0]) processFileSM(input.files[0]);
+}
+
+function processFileSM(file) {
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const base64 = e.target.result.split(',')[1];
+    _smUploadData = { base64, mimeType: file.type, nama: file.name.replace(/\.[^.]+$/, '') };
+    document.getElementById('uploadPreviewSM').style.display = 'block';
+    document.getElementById('uploadFilenameSM').textContent  = file.name;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function simpanSuratMasuk() {
+  const noSurat  = document.getElementById('smNoSurat')?.value?.trim();
+  const pengirim = document.getElementById('smPengirim')?.value?.trim();
+  const perihal  = document.getElementById('smPerihal')?.value?.trim();
+  if (!noSurat || !pengirim || !perihal) { Toast.warn('Lengkapi field wajib.'); return; }
+
+  const btn = document.getElementById('btnSimpanSM');
+  btn.disabled = true; btn.textContent = 'Menyimpan...';
+
+  try {
+    let lampiranId = '', lampiranUrl = '';
+    if (_smUploadData) {
+      const upRes = _smUploadData.mimeType === 'application/pdf'
+        ? await API.uploadPdf(_smUploadData.base64, _smUploadData.nama, Session.jenjang)
+        : await API.uploadFoto(_smUploadData.base64, _smUploadData.mimeType, _smUploadData.nama, Session.jenjang);
+      if (!upRes.success) throw new Error(upRes.message);
+      lampiranId  = upRes.data.fileId;
+      lampiranUrl = upRes.data.fileUrl;
+    }
+    const res = await API.catSuratMasuk({
+      noSurat, pengirim, perihal,
+      tglSurat   : document.getElementById('smTglSurat')?.value,
+      tglTerima  : document.getElementById('smTglTerima')?.value,
+      klasifikasi: document.getElementById('smKlasifikasi')?.value,
+      lampiranId, lampiranUrl,
+    });
+    if (res.success) {
+      Toast.success(`Surat masuk dicatat. No. Agenda: ${res.data.noAgenda}`);
+      Modal.close(); loadSuratMasuk();
+    } else throw new Error(res.message);
+  } catch(e) {
+    Toast.error('Gagal menyimpan: ' + e.message);
+    btn.disabled = false; btn.textContent = '💾 Simpan';
+  }
+}
+
+function openDisposisi(suratId) {
+  _dispSuratId = suratId;
+  const tpl = document.getElementById('tplDisposisi');
+  Modal.open('📋 Disposisi Surat', tpl.innerHTML, { hideFooter: true });
+  // Isi dropdown user
+  API.getUsers().then(res => {
+    const sel = document.getElementById('dispKepada');
+    if (res.data) res.data.filter(u => u.username !== Session.username && u.status === 'AKTIF').forEach(u => {
+      const opt = document.createElement('option');
+      opt.value = u.username; opt.textContent = `${u.nama} (${u.role.replace('_',' ')})`;
+      sel.appendChild(opt);
+    });
+  });
+}
+
+async function kirimDisposisi() {
+  const kepada  = document.getElementById('dispKepada')?.value;
+  const catatan = document.getElementById('dispCatatan')?.value;
+  if (!kepada) { Toast.warn('Pilih penerima disposisi.'); return; }
+  const res = await API.buatDisposisi({ suratId: _dispSuratId, kepada, catatan });
+  if (res.success) { Toast.success('Disposisi berhasil dikirim.'); Modal.close(); loadSuratMasuk(); }
+  else Toast.error(res.message);
+}
+</script>

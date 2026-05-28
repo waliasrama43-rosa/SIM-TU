@@ -1,0 +1,228 @@
+<!-- kesiswaan.html -->
+<div id="kesiswaanPage">
+
+  <div class="page-header">
+    <div><h2>🎓 Data Siswa</h2><p>Manajemen data siswa per jenjang</p></div>
+    <button class="btn btn-primary" onclick="openFormTambahSiswa()">+ Tambah Siswa</button>
+  </div>
+
+  <!-- TABS JENJANG -->
+  <div class="tabs" id="jenjangTabs">
+    <button class="tab-btn active" data-jenjang="SD"  onclick="switchJenjang('SD',this)">🔴 SD</button>
+    <button class="tab-btn"        data-jenjang="SMP" onclick="switchJenjang('SMP',this)">🔵 SMP</button>
+    <button class="tab-btn"        data-jenjang="SMA" onclick="switchJenjang('SMA',this)">⚫ SMA</button>
+  </div>
+
+  <!-- FILTER -->
+  <div class="card">
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>Nama Siswa</label>
+        <input type="text" class="filter-input" id="siswaFilterNama" placeholder="Cari nama...">
+      </div>
+      <div class="filter-group">
+        <label>NISN</label>
+        <input type="text" class="filter-input" id="siswaFilterNisn" placeholder="NISN..." style="width:130px;">
+      </div>
+      <div class="filter-group">
+        <label>Kelas</label>
+        <input type="text" class="filter-input" id="siswaFilterKelas" placeholder="7A..." style="width:80px;">
+      </div>
+      <div class="filter-group">
+        <label>Status</label>
+        <select class="filter-input" id="siswaFilterStatus">
+          <option value="AKTIF">Aktif</option>
+          <option value="">Semua</option>
+          <option value="LULUS">Lulus</option>
+          <option value="MUTASI">Mutasi</option>
+          <option value="PROMOSI_PENDING">Pending Promosi</option>
+        </select>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-primary" onclick="loadSiswa()">🔍 Cari</button>
+        <button class="btn btn-secondary" onclick="resetFilterSiswa()">Reset</button>
+      </div>
+    </div>
+
+    <div class="table-wrapper" style="border:none;border-radius:0;">
+      <table>
+        <thead>
+          <tr>
+            <th>NISN</th><th>Nama Siswa</th><th>Kelas</th><th>Rombel</th>
+            <th>Tgl Lahir</th><th>Jenis Kelamin</th><th>Status</th>
+            <th style="text-align:center;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tbodySiswa">
+          <tr><td colspan="8" class="table-empty">Memuat data siswa...</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="padding:12px 20px;font-size:12px;color:#6b7280;border-top:1px solid #e5e7eb;" id="siswaCount"></div>
+  </div>
+
+  <!-- FORM TAMBAH SISWA -->
+  <template id="tplFormSiswa">
+    <div class="form-grid">
+      <div class="form-group">
+        <label class="form-label">NISN <span class="req">*</span></label>
+        <input type="text" class="form-control" id="sisNisn" placeholder="10 digit NISN">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nama Lengkap <span class="req">*</span></label>
+        <input type="text" class="form-control" id="sisNama" placeholder="Nama lengkap siswa">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tempat Lahir</label>
+        <input type="text" class="form-control" id="sisTempatLahir" placeholder="Kota/Kab">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tanggal Lahir</label>
+        <input type="date" class="form-control" id="sisTglLahir">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Jenis Kelamin</label>
+        <select class="form-control" id="sisJenisKelamin">
+          <option value="L">Laki-laki</option>
+          <option value="P">Perempuan</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kelas <span class="req">*</span></label>
+        <input type="text" class="form-control" id="sisKelas" placeholder="7A / 8B...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Rombel</label>
+        <input type="text" class="form-control" id="sisRombel" placeholder="Rombongan belajar">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tahun Masuk</label>
+        <input type="number" class="form-control" id="sisTahunMasuk" value="2026">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nama Ayah</label>
+        <input type="text" class="form-control" id="sisNamaAyah">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nama Ibu</label>
+        <input type="text" class="form-control" id="sisNamaIbu">
+      </div>
+      <div class="form-group">
+        <label class="form-label">No. Telp Orang Tua</label>
+        <input type="text" class="form-control" id="sisNoTelp" placeholder="08xx...">
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Alamat</label>
+        <textarea class="form-control" id="sisAlamat" rows="2" placeholder="Alamat lengkap"></textarea>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="Modal.close()">Batal</button>
+      <button class="btn btn-primary" onclick="simpanSiswa()">💾 Simpan</button>
+    </div>
+  </template>
+
+</div>
+
+<script>
+let _activeJenjang = Session.jenjang || 'SD';
+
+registerPage('kesiswaan', async function(container) {
+  container.innerHTML = document.getElementById('kesiswaanPage').outerHTML;
+  // Set tab sesuai jenjang user
+  _activeJenjang = Session.jenjang;
+  document.querySelectorAll('#jenjangTabs .tab-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.jenjang === _activeJenjang);
+    if (!Session.isKepalaTU() && btn.dataset.jenjang !== Session.jenjang) btn.style.display = 'none';
+  });
+  await loadSiswa();
+});
+
+function switchJenjang(jenjang, btn) {
+  _activeJenjang = jenjang;
+  document.querySelectorAll('#jenjangTabs .tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  loadSiswa();
+}
+
+async function loadSiswa() {
+  const filter = {
+    nama   : document.getElementById('siswaFilterNama')?.value || '',
+    nisn   : document.getElementById('siswaFilterNisn')?.value || '',
+    kelas  : document.getElementById('siswaFilterKelas')?.value || '',
+    status : document.getElementById('siswaFilterStatus')?.value || 'AKTIF',
+  };
+  const tbody = document.getElementById('tbodySiswa');
+  tbody.innerHTML = `<tr><td colspan="8" class="table-empty"><div class="loading-spinner" style="margin:0 auto;width:24px;height:24px;"></div></td></tr>`;
+  try {
+    const res = await API.getSiswa(_activeJenjang, filter);
+    document.getElementById('siswaCount').textContent = `${res.data?.length||0} siswa ditemukan di jenjang ${_activeJenjang}`;
+    if (!res.data || res.data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="table-empty">Tidak ada data siswa.</td></tr>`; return;
+    }
+    tbody.innerHTML = res.data.map(s => `
+      <tr>
+        <td style="font-family:monospace;">${escHtml(s.nisn||'—')}</td>
+        <td style="font-weight:600;">${escHtml(s.nama)}</td>
+        <td>${escHtml(s.kelas||'—')}</td>
+        <td>${escHtml(s.rombel||'—')}</td>
+        <td>${fmtTanggal(s.tglLahir)}</td>
+        <td>${s.jenisKelamin==='L'?'Laki-laki':'Perempuan'}</td>
+        <td>${statusBadge(s.status)}</td>
+        <td style="text-align:center;white-space:nowrap;">
+          ${s.status==='AKTIF' ? `<button class="btn btn-sm btn-warning" onclick="ajukanPromosiSiswa('${s.id}')">⬆️ Promosi</button>` : ''}
+        </td>
+      </tr>`).join('');
+  } catch(e) { Toast.error('Gagal: ' + e.message); }
+}
+
+function resetFilterSiswa() {
+  document.getElementById('siswaFilterNama').value  = '';
+  document.getElementById('siswaFilterNisn').value  = '';
+  document.getElementById('siswaFilterKelas').value = '';
+  document.getElementById('siswaFilterStatus').value = 'AKTIF';
+  loadSiswa();
+}
+
+function openFormTambahSiswa() {
+  const tpl = document.getElementById('tplFormSiswa');
+  Modal.open(`➕ Tambah Siswa — ${_activeJenjang}`, tpl.innerHTML, { hideFooter: true, large: true });
+}
+
+async function simpanSiswa() {
+  const nisn = document.getElementById('sisNisn')?.value?.trim();
+  const nama = document.getElementById('sisNama')?.value?.trim();
+  const kelas= document.getElementById('sisKelas')?.value?.trim();
+  if (!nisn || !nama || !kelas) { Toast.warn('NISN, Nama, dan Kelas wajib diisi.'); return; }
+  const res = await API.tambahSiswa(_activeJenjang, {
+    nisn, nama, kelas,
+    tempatLahir  : document.getElementById('sisTempatLahir')?.value,
+    tglLahir     : document.getElementById('sisTglLahir')?.value,
+    jenisKelamin : document.getElementById('sisJenisKelamin')?.value,
+    rombel       : document.getElementById('sisRombel')?.value,
+    tahunMasuk   : document.getElementById('sisTahunMasuk')?.value,
+    namaAyah     : document.getElementById('sisNamaAyah')?.value,
+    namaIbu      : document.getElementById('sisNamaIbu')?.value,
+    noTelpOrtu   : document.getElementById('sisNoTelp')?.value,
+    alamat       : document.getElementById('sisAlamat')?.value,
+  });
+  if (res.success) { Toast.success('Siswa berhasil ditambahkan.'); Modal.close(); loadSiswa(); }
+  else Toast.error(res.message);
+}
+
+function ajukanPromosiSiswa(siswaId) {
+  const jenjangTujuan = _activeJenjang === 'SD' ? 'SMP' : 'SMA';
+  Modal.open('⬆️ Konfirmasi Promosi', `
+    <p>Ajukan promosi siswa ini ke jenjang <strong>${jenjangTujuan}</strong>?</p>
+    <p style="margin-top:8px;font-size:13px;color:#6b7280;">Pengajuan akan dikirim ke TU ${jenjangTujuan} untuk dikonfirmasi (Maker-Checker).</p>`,
+    {
+      confirmText: `Ajukan ke ${jenjangTujuan}`,
+      confirmClass: 'btn-warning',
+      onConfirm: async () => {
+        const res = await API.ajukanPromosi(_activeJenjang, siswaId);
+        if (res.success) { Toast.success(res.message); loadSiswa(); }
+        else Toast.error(res.message);
+      }
+    });
+}
+</script>

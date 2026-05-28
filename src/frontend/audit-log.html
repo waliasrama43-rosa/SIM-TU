@@ -1,0 +1,63 @@
+<!-- audit-log.html — Kepala TU only -->
+<div id="auditLogPage">
+  <div class="page-header">
+    <div><h2>🔍 Audit Log</h2><p>Rekam jejak seluruh aktivitas sistem</p></div>
+    <button class="btn btn-secondary" onclick="loadAuditLog()">🔄 Refresh</button>
+  </div>
+  <div class="card">
+    <div class="filter-bar">
+      <div class="filter-group">
+        <label>Jumlah baris</label>
+        <select class="filter-input" id="auditLimit">
+          <option value="50">50 terakhir</option>
+          <option value="100">100 terakhir</option>
+          <option value="200">200 terakhir</option>
+        </select>
+      </div>
+      <div class="filter-actions">
+        <button class="btn btn-primary" onclick="loadAuditLog()">🔍 Tampilkan</button>
+      </div>
+    </div>
+    <div class="table-wrapper" style="border:none;border-radius:0;">
+      <table>
+        <thead>
+          <tr><th>Waktu</th><th>User</th><th>Aksi</th><th>Detail</th><th>Platform</th></tr>
+        </thead>
+        <tbody id="tbodyAudit">
+          <tr><td colspan="5" class="table-empty"><div class="loading-spinner" style="margin:0 auto;width:24px;height:24px;"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+registerPage('audit-log', async function(container) {
+  if (!Session.isKepalaTU()) {
+    container.innerHTML = `<div class="loading-page"><p>⛔ Akses ditolak. Hanya Kepala TU.</p></div>`;
+    return;
+  }
+  container.innerHTML = document.getElementById('auditLogPage').outerHTML;
+  await loadAuditLog();
+});
+
+async function loadAuditLog() {
+  const limit = document.getElementById('auditLimit')?.value || 50;
+  const tbody = document.getElementById('tbodyAudit');
+  tbody.innerHTML = `<tr><td colspan="5" class="table-empty"><div class="loading-spinner" style="margin:0 auto;width:24px;height:24px;"></div></td></tr>`;
+  try {
+    const res = await API.getAuditLog(limit);
+    if (!res.data || res.data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="table-empty">Belum ada log.</td></tr>`; return;
+    }
+    tbody.innerHTML = res.data.map(a => `
+      <tr>
+        <td style="white-space:nowrap;font-size:12px;">${fmtTanggal(a.timestamp)}</td>
+        <td style="font-weight:600;">${escHtml(a.username)}</td>
+        <td><code style="font-size:11px;background:#f1f5f9;padding:2px 6px;border-radius:4px;">${escHtml(a.aksi)}</code></td>
+        <td style="font-size:12px;color:#6b7280;">${escHtml(a.detail)}</td>
+        <td><span class="badge badge-gray">${escHtml(a.platform||'—')}</span></td>
+      </tr>`).join('');
+  } catch(e) { Toast.error('Gagal: ' + e.message); }
+}
+</script>

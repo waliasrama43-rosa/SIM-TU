@@ -1,0 +1,68 @@
+<!-- disposisi.html -->
+<div id="disposisiPage">
+
+  <div class="page-header">
+    <div><h2>📋 Disposisi Surat</h2><p>Daftar disposisi masuk yang perlu ditindaklanjuti</p></div>
+    <button class="btn btn-secondary" onclick="loadDisposisi()">🔄 Refresh</button>
+  </div>
+
+  <div class="card">
+    <div class="table-wrapper" style="border:none;">
+      <table>
+        <thead>
+          <tr>
+            <th>No. Agenda</th><th>Perihal</th><th>Dari</th>
+            <th>Catatan</th><th>Level</th><th>Status</th>
+            <th>Tgl Disposisi</th><th style="text-align:center;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyDisposisi">
+          <tr><td colspan="8" class="table-empty"><div class="loading-spinner" style="margin:0 auto;width:24px;height:24px;"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+registerPage('disposisi', async function(container) {
+  container.innerHTML = document.getElementById('disposisiPage').outerHTML;
+  await loadDisposisi();
+});
+
+async function loadDisposisi() {
+  const tbody = document.getElementById('tbodyDisposisi');
+  tbody.innerHTML = `<tr><td colspan="8" class="table-empty"><div class="loading-spinner" style="margin:0 auto;width:24px;height:24px;"></div></td></tr>`;
+  try {
+    const res = await API.getDisposisi();
+    if (!res.data || res.data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="8" class="table-empty">✅ Tidak ada disposisi yang menunggu.</td></tr>`;
+      document.getElementById('badgeDisposisi') && (document.getElementById('badgeDisposisi').style.display = 'none');
+      return;
+    }
+    const badge = document.getElementById('badgeDisposisi');
+    if (badge) { badge.textContent = res.data.length; badge.style.display = 'inline'; }
+    tbody.innerHTML = res.data.map(d => `
+      <tr>
+        <td><code style="font-size:11px;">${escHtml(d.noAgenda)}</code></td>
+        <td>${escHtml(d.perihal)}</td>
+        <td>${escHtml(d.dari)}</td>
+        <td style="max-width:200px;font-size:12px;color:#6b7280;">${escHtml(d.catatan||'—')}</td>
+        <td style="text-align:center;"><span class="badge badge-info">Lvl ${d.level}</span></td>
+        <td>${statusBadge(d.status)}</td>
+        <td>${fmtTanggal(d.tglDisposisi)}</td>
+        <td style="text-align:center;white-space:nowrap;">
+          <button class="btn btn-sm btn-success" onclick="updateDisp('${d.id}','DITERIMA')">Terima</button>
+          <button class="btn btn-sm btn-primary" onclick="updateDisp('${d.id}','DIPROSES')">Proses</button>
+          <button class="btn btn-sm btn-secondary" onclick="updateDisp('${d.id}','SELESAI')">Selesai</button>
+        </td>
+      </tr>`).join('');
+  } catch(e) { Toast.error('Gagal memuat: ' + e.message); }
+}
+
+async function updateDisp(id, status) {
+  const res = await API.updateDisposisi(id, status);
+  if (res.success) { Toast.success(`Status disposisi → ${status}`); loadDisposisi(); }
+  else Toast.error(res.message);
+}
+</script>

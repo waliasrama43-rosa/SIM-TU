@@ -1,0 +1,150 @@
+<!-- template-reg.html — Kepala TU only -->
+<div id="templateRegPage">
+
+  <div class="page-header">
+    <div><h2>📄 Template Surat</h2><p>Kelola template surat keluar — tidak perlu sentuh kode</p></div>
+    <button class="btn btn-primary" onclick="openFormTemplate()">+ Tambah Template</button>
+  </div>
+
+  <!-- INFO BOX -->
+  <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:14px 18px;margin-bottom:20px;font-size:13px;">
+    <strong>💡 Cara Menambah Template:</strong><br>
+    1. Buat dokumen di <a href="https://docs.google.com" target="_blank">Google Docs</a> dengan placeholder <code>{{nama_variabel}}</code><br>
+    2. Bagikan dokumen tersebut ke akun Google yang menjalankan GAS (sebagai Editor)<br>
+    3. Copy URL Google Doc, lalu klik <strong>+ Tambah Template</strong> di atas
+  </div>
+
+  <div class="card">
+    <div class="table-wrapper" style="border:none;">
+      <table>
+        <thead>
+          <tr>
+            <th>Nama Template</th><th>Kode Surat</th><th>Klasifikasi</th>
+            <th>Placeholder</th><th>Jenjang</th><th>Status</th>
+            <th style="text-align:center;">Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tbodyTemplate">
+          <tr><td colspan="7" class="table-empty"><div class="loading-spinner" style="margin:0 auto;width:24px;height:24px;"></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FORM TAMBAH TEMPLATE -->
+  <template id="tplFormTemplate">
+    <div class="form-grid">
+      <div class="form-group full">
+        <label class="form-label">Nama Template <span class="req">*</span></label>
+        <input type="text" class="form-control" id="tplNama" placeholder="Surat Keterangan Aktif">
+      </div>
+      <div class="form-group full">
+        <label class="form-label">URL Google Doc <span class="req">*</span></label>
+        <input type="url" class="form-control" id="tplDocUrl" placeholder="https://docs.google.com/document/d/...">
+        <span class="form-hint">Pastikan Google Doc sudah dibagikan ke akun GAS sebagai Editor</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kode Surat <span class="req">*</span></label>
+        <input type="text" class="form-control" id="tplKode" placeholder="DL / SKET / MUT...">
+        <span class="form-hint">Kode ini masuk ke format nomor surat</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Kode Klasifikasi Arsip</label>
+        <input type="text" class="form-control" id="tplKlasifikasi" placeholder="00.00" value="00.00">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Berlaku untuk Jenjang</label>
+        <select class="form-control" id="tplJenjang">
+          <option value="SEMUA">Semua Jenjang</option>
+          <option value="SD">SD saja</option>
+          <option value="SMP">SMP saja</option>
+          <option value="SMA">SMA saja</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Daftar Placeholder <span class="req">*</span></label>
+        <input type="text" class="form-control" id="tplPlaceholders" placeholder="nama_siswa,kelas,keperluan,tanggal_kegiatan">
+        <span class="form-hint">Pisahkan dengan koma. Contoh: <code>nama_siswa,kelas,keperluan</code>. Field otomatis (no_surat, tanggal, nama_sekolah, dll) tidak perlu ditulis.</span>
+      </div>
+      <div class="form-group full">
+        <label class="form-label">Keterangan</label>
+        <input type="text" class="form-control" id="tplKeterangan" placeholder="Keterangan singkat tentang template ini">
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-secondary" onclick="Modal.close()">Batal</button>
+      <button class="btn btn-primary" onclick="simpanTemplate()">💾 Simpan Template</button>
+    </div>
+  </template>
+
+</div>
+
+<script>
+registerPage('template-reg', async function(container) {
+  if (!Session.isKepalaTU()) {
+    container.innerHTML = `<div class="loading-page"><p>⛔ Akses ditolak. Hanya Kepala TU.</p></div>`;
+    return;
+  }
+  container.innerHTML = document.getElementById('templateRegPage').outerHTML;
+  await loadTemplates();
+});
+
+async function loadTemplates() {
+  const tbody = document.getElementById('tbodyTemplate');
+  tbody.innerHTML = `<tr><td colspan="7" class="table-empty"><div class="loading-spinner" style="margin:0 auto;width:24px;height:24px;"></div></td></tr>`;
+  try {
+    const res = await API.getTemplates('');  // Semua jenjang
+    if (!res.data || res.data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7" class="table-empty">Belum ada template. Tambah template baru.</td></tr>`;
+      return;
+    }
+    tbody.innerHTML = res.data.map(t => `
+      <tr>
+        <td style="font-weight:600;">${escHtml(t.nama)}</td>
+        <td><span class="badge badge-gray">${escHtml(t.kodeSurat)}</span></td>
+        <td><code>${escHtml(t.klasifikasi)}</code></td>
+        <td style="font-size:11px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${escHtml(t.placeholders?.join(', ')||'')}">
+          <code>${escHtml(t.placeholders?.join(', ')||'—')}</code>
+        </td>
+        <td><span class="badge badge-info">${escHtml(t.jenjang)}</span></td>
+        <td>${t.aktif ? '<span class="badge badge-success">AKTIF</span>' : '<span class="badge badge-danger">NONAKTIF</span>'}</td>
+        <td style="text-align:center;white-space:nowrap;">
+          <a href="https://docs.google.com/document/d/${escHtml(t.docId)}/edit" target="_blank" class="btn btn-sm btn-secondary">📝 Edit Doc</a>
+          <button class="btn btn-sm ${t.aktif?'btn-danger':'btn-success'}" onclick="toggleTpl('${t.id}',${!t.aktif})">
+            ${t.aktif ? 'Nonaktifkan' : 'Aktifkan'}
+          </button>
+        </td>
+      </tr>`).join('');
+  } catch(e) { Toast.error('Gagal: ' + e.message); }
+}
+
+function openFormTemplate() {
+  const tpl = document.getElementById('tplFormTemplate');
+  Modal.open('➕ Tambah Template Surat', tpl.innerHTML, { hideFooter: true, large: true });
+}
+
+async function simpanTemplate() {
+  const nama   = document.getElementById('tplNama')?.value?.trim();
+  const docUrl = document.getElementById('tplDocUrl')?.value?.trim();
+  const kode   = document.getElementById('tplKode')?.value?.trim();
+  const ph     = document.getElementById('tplPlaceholders')?.value?.trim();
+  if (!nama || !docUrl || !kode) { Toast.warn('Nama, URL Doc, dan Kode Surat wajib diisi.'); return; }
+  const res = await API.tambahTemplate({
+    nama,
+    docUrl,
+    kodeSurat    : kode,
+    klasifikasi  : document.getElementById('tplKlasifikasi')?.value || '00.00',
+    jenjang      : document.getElementById('tplJenjang')?.value || 'SEMUA',
+    placeholders : ph ? ph.split(',').map(s=>s.trim()) : [],
+    keterangan   : document.getElementById('tplKeterangan')?.value,
+  });
+  if (res.success) { Toast.success('Template berhasil ditambahkan.'); Modal.close(); loadTemplates(); }
+  else Toast.error(res.message);
+}
+
+async function toggleTpl(id, aktif) {
+  const res = await API.toggleTemplate(id, aktif);
+  if (res.success) { Toast.success(res.message); loadTemplates(); }
+  else Toast.error(res.message);
+}
+</script>
