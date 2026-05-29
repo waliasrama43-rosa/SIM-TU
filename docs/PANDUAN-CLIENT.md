@@ -100,7 +100,6 @@ Contoh ID: `1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms`
 
 | Nama File HTML | Salin dari |
 |---|---|
-| `frontend/login` | `src/frontend/login.html` |
 | `frontend/index` | `src/frontend/index.html` |
 | `frontend/dashboard` | `src/frontend/dashboard.html` |
 | `frontend/surat-masuk` | `src/frontend/surat-masuk.html` |
@@ -111,8 +110,8 @@ Contoh ID: `1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms`
 | `frontend/users` | `src/frontend/users.html` |
 | `frontend/config` | `src/frontend/config.html` |
 | `frontend/audit-log` | `src/frontend/audit-log.html` |
-| `frontend/assets/css/main` | `src/frontend/assets/css/main.css` |
-| `frontend/assets/js/main` | `src/frontend/assets/js/main.js` |
+| `frontend/styles` | `src/frontend/styles.html` |
+| `frontend/scripts` | `src/frontend/scripts.html` |
 
 **5.** Di file `Code.gs`, isi `SPREADSHEET_ID`:
 ```javascript

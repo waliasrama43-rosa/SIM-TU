@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>SIM-TU — Tata Usaha</title>
-  <link rel="stylesheet" href="assets/css/main.css">
+  <?!= include('frontend/styles'); ?>
 </head>
 <body>
 
@@ -137,6 +137,15 @@
 <!-- ===== TOAST NOTIFICATION ===== -->
 <div class="toast-container" id="toastContainer"></div>
 
-<script src="assets/js/main.js"></script>
+<?!= include('frontend/scripts'); ?>
+<?!= include('frontend/dashboard'); ?>
+<?!= include('frontend/surat-masuk'); ?>
+<?!= include('frontend/surat-keluar'); ?>
+<?!= include('frontend/disposisi'); ?>
+<?!= include('frontend/kesiswaan'); ?>
+<?!= include('frontend/template-reg'); ?>
+<?!= include('frontend/users'); ?>
+<?!= include('frontend/config'); ?>
+<?!= include('frontend/audit-log'); ?>
 </body>
 </html>

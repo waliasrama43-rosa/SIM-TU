@@ -1,5 +1,5 @@
 <!-- config.html — Kepala TU only -->
-<div id="configPage">
+<template id="configPage">
 
   <div class="page-header">
     <div><h2>⚙️ Konfigurasi Sistem</h2><p>Ubah pengaturan sistem tanpa menyentuh kode</p></div>
@@ -15,7 +15,7 @@
     <div class="loading-page"><div class="loading-spinner"></div></div>
   </div>
 
-</div>
+</template>
 
 <script>
 registerPage('config', async function(container) {
@@ -23,7 +23,7 @@ registerPage('config', async function(container) {
     container.innerHTML = `<div class="loading-page"><p>⛔ Akses ditolak. Hanya Kepala TU.</p></div>`;
     return;
   }
-  container.innerHTML = document.getElementById('configPage').outerHTML;
+  container.innerHTML = document.getElementById('configPage').innerHTML;
   await loadConfig();
 });
 

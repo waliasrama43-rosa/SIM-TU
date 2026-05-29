@@ -1,5 +1,5 @@
 <!-- template-reg.html — Kepala TU only -->
-<div id="templateRegPage">
+<template id="templateRegPage">
 
   <div class="page-header">
     <div><h2>📄 Template Surat</h2><p>Kelola template surat keluar — tidak perlu sentuh kode</p></div>
@@ -77,7 +77,7 @@
     </div>
   </template>
 
-</div>
+</template>
 
 <script>
 registerPage('template-reg', async function(container) {
@@ -85,7 +85,7 @@ registerPage('template-reg', async function(container) {
     container.innerHTML = `<div class="loading-page"><p>⛔ Akses ditolak. Hanya Kepala TU.</p></div>`;
     return;
   }
-  container.innerHTML = document.getElementById('templateRegPage').outerHTML;
+  container.innerHTML = document.getElementById('templateRegPage').innerHTML;
   await loadTemplates();
 });
 

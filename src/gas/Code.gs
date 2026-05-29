@@ -47,27 +47,16 @@ const JENJANG = {
 
 /**
  * Menangani request GET → render Web App
+ *
+ * Catatan: doGet SELALU menyajikan shell (index). Gerbang autentikasi
+ * ditangani di sisi client berdasarkan session token di sessionStorage,
+ * karena server tidak bisa membaca sessionStorage browser.
  */
 function doGet(e) {
-  const page = e.parameter.page || 'dashboard';
-  const token = e.parameter.token || '';
-
-  // Validasi sesi
-  const user = Auth.validateSession(token);
-  if (!user) {
-    return HtmlService.createTemplateFromFile('frontend/login')
-      .evaluate()
-      .setTitle('SIM-TU — Login')
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
-  }
-
-  const template = HtmlService.createTemplateFromFile('frontend/index');
-  template.user = user;
-  template.page = page;
-  template.version = VERSION;
-
-  return template.evaluate()
+  return HtmlService.createTemplateFromFile('frontend/index')
+    .evaluate()
     .setTitle('SIM-TU — Tata Usaha')
+    .addMetaTag('viewport', 'width=device-width, initial-scale=1')
     .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL);
 }
 

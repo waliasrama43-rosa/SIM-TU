@@ -1,5 +1,5 @@
 <!-- audit-log.html — Kepala TU only -->
-<div id="auditLogPage">
+<template id="auditLogPage">
   <div class="page-header">
     <div><h2>🔍 Audit Log</h2><p>Rekam jejak seluruh aktivitas sistem</p></div>
     <button class="btn btn-secondary" onclick="loadAuditLog()">🔄 Refresh</button>
@@ -29,7 +29,7 @@
       </table>
     </div>
   </div>
-</div>
+</template>
 
 <script>
 registerPage('audit-log', async function(container) {
@@ -37,7 +37,7 @@ registerPage('audit-log', async function(container) {
     container.innerHTML = `<div class="loading-page"><p>⛔ Akses ditolak. Hanya Kepala TU.</p></div>`;
     return;
   }
-  container.innerHTML = document.getElementById('auditLogPage').outerHTML;
+  container.innerHTML = document.getElementById('auditLogPage').innerHTML;
   await loadAuditLog();
 });
 

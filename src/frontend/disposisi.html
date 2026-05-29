@@ -1,5 +1,5 @@
 <!-- disposisi.html -->
-<div id="disposisiPage">
+<template id="disposisiPage">
 
   <div class="page-header">
     <div><h2>📋 Disposisi Surat</h2><p>Daftar disposisi masuk yang perlu ditindaklanjuti</p></div>
@@ -22,11 +22,11 @@
       </table>
     </div>
   </div>
-</div>
+</template>
 
 <script>
 registerPage('disposisi', async function(container) {
-  container.innerHTML = document.getElementById('disposisiPage').outerHTML;
+  container.innerHTML = document.getElementById('disposisiPage').innerHTML;
   await loadDisposisi();
 });
 

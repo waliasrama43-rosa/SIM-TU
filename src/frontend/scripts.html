@@ -1,3 +1,4 @@
+<script>
 /* ============================================================
    SIM-TU — Main JavaScript
    Handles: routing, auth, API calls, UI utilities
@@ -152,11 +153,76 @@ function escHtml(s) {
 }
 
 
-// ── INIT APP ──────────────────────────────────────────
+// ── INIT APP (gerbang autentikasi sisi client) ───────
 function initApp() {
-  // Auth guard
-  if (!Session.token) { window.location.reload(); return; }
+  if (!Session.token) { showLogin(); return; }
+  buildApp();
+}
 
+// ── LOGIN VIEW ────────────────────────────────────────
+function showLogin() {
+  const overlay = document.createElement('div');
+  overlay.id = 'loginOverlay';
+  overlay.style.cssText =
+    'position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;' +
+    'background:linear-gradient(135deg,#1a3c5e 0%,#0d2137 100%);padding:24px;';
+  overlay.innerHTML =
+    '<div style="width:100%;max-width:400px;background:#fff;border-radius:16px;padding:36px 32px;box-shadow:0 24px 64px rgba(0,0,0,.3);">' +
+      '<div style="text-align:center;margin-bottom:28px;">' +
+        '<div style="font-size:40px;">🏫</div>' +
+        '<h1 style="font-size:22px;color:#1a3c5e;margin-top:8px;">SIM-TU</h1>' +
+        '<p style="font-size:13px;color:#6b7280;margin-top:4px;">Sistem Informasi Manajemen Tata Usaha</p>' +
+      '</div>' +
+      '<div id="loginError" style="display:none;background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;"></div>' +
+      '<div class="form-group" style="margin-bottom:16px;">' +
+        '<label class="form-label">Username</label>' +
+        '<input type="text" class="form-control" id="loginUsername" placeholder="Masukkan username" autofocus>' +
+      '</div>' +
+      '<div class="form-group" style="margin-bottom:20px;">' +
+        '<label class="form-label">Password</label>' +
+        '<input type="password" class="form-control" id="loginPassword" placeholder="Masukkan password">' +
+      '</div>' +
+      '<button class="btn btn-primary" id="btnDoLogin" style="width:100%;justify-content:center;padding:11px;">Masuk</button>' +
+      '<p style="text-align:center;margin-top:20px;font-size:12px;color:#9ca3af;">Hanya untuk staf TU terdaftar.</p>' +
+    '</div>';
+  document.body.appendChild(overlay);
+
+  const doLogin = () => {
+    const u   = document.getElementById('loginUsername').value.trim();
+    const p   = document.getElementById('loginPassword').value;
+    const err = document.getElementById('loginError');
+    const btn = document.getElementById('btnDoLogin');
+    if (!u || !p) { err.textContent = 'Username dan password wajib diisi.'; err.style.display = 'block'; return; }
+    err.style.display = 'none';
+    btn.disabled = true; btn.textContent = 'Memproses...';
+    google.script.run
+      .withSuccessHandler(raw => {
+        let res; try { res = JSON.parse(raw); } catch(e) { res = { success:false, message:'Respon tidak valid.' }; }
+        if (res.success) {
+          sessionStorage.setItem('simtu_token',    res.data.token);
+          sessionStorage.setItem('simtu_username', res.data.username);
+          sessionStorage.setItem('simtu_nama',     res.data.nama);
+          sessionStorage.setItem('simtu_role',     res.data.role);
+          sessionStorage.setItem('simtu_jenjang',  res.data.jenjang);
+          window.location.reload();
+        } else {
+          err.textContent = res.message || 'Login gagal.'; err.style.display = 'block';
+          btn.disabled = false; btn.textContent = 'Masuk';
+        }
+      })
+      .withFailureHandler(e => {
+        err.textContent = 'Kesalahan sistem: ' + e.message; err.style.display = 'block';
+        btn.disabled = false; btn.textContent = 'Masuk';
+      })
+      .loginUser(u, p);
+  };
+
+  document.getElementById('btnDoLogin').addEventListener('click', doLogin);
+  document.getElementById('loginPassword').addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); });
+}
+
+// ── BUILD APP (setelah login terverifikasi) ──────────
+function buildApp() {
   // Populate UI
   document.getElementById('sidebarNama').textContent  = Session.nama;
   document.getElementById('sidebarRole').textContent  = Session.role.replace('_',' ');
@@ -224,3 +290,4 @@ function initApp() {
 }
 
 document.addEventListener('DOMContentLoaded', initApp);
+</script>

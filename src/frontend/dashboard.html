@@ -1,5 +1,5 @@
 <!-- dashboard.html — dimuat dinamis ke dalam #pageContent -->
-<div id="dashboardPage">
+<template id="dashboardPage">
 
   <div class="page-header">
     <div>
@@ -86,11 +86,11 @@
     </div>
   </div>
 
-</div>
+</template>
 
 <script>
 registerPage('dashboard', async function(container) {
-  container.innerHTML = document.getElementById('dashboardPage').outerHTML;
+  container.innerHTML = document.getElementById('dashboardPage').innerHTML;
   await loadDashboard();
 });
 

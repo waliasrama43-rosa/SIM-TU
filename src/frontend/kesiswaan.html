@@ -1,5 +1,5 @@
 <!-- kesiswaan.html -->
-<div id="kesiswaanPage">
+<template id="kesiswaanPage">
 
   <div class="page-header">
     <div><h2>🎓 Data Siswa</h2><p>Manajemen data siswa per jenjang</p></div>
@@ -122,13 +122,13 @@
     </div>
   </template>
 
-</div>
+</template>
 
 <script>
 let _activeJenjang = Session.jenjang || 'SD';
 
 registerPage('kesiswaan', async function(container) {
-  container.innerHTML = document.getElementById('kesiswaanPage').outerHTML;
+  container.innerHTML = document.getElementById('kesiswaanPage').innerHTML;
   // Set tab sesuai jenjang user
   _activeJenjang = Session.jenjang;
   document.querySelectorAll('#jenjangTabs .tab-btn').forEach(btn => {

@@ -1,5 +1,5 @@
 <!-- surat-masuk.html -->
-<div id="suratMasukPage">
+<template id="suratMasukPage">
 
   <div class="page-header">
     <div><h2>📥 Surat Masuk</h2><p>Pencatatan & arsip surat masuk digital</p></div>
@@ -141,14 +141,14 @@
     </div>
   </template>
 
-</div>
+</template>
 
 <script>
 let _smUploadData = null;  // { base64, mimeType, nama }
 let _dispSuratId  = null;
 
 registerPage('surat-masuk', async function(container) {
-  container.innerHTML = document.getElementById('suratMasukPage').outerHTML;
+  container.innerHTML = document.getElementById('suratMasukPage').innerHTML;
   // Set default filter bulan & tahun
   const now = new Date();
   document.getElementById('smFilterBulan').value = now.getMonth() + 1;

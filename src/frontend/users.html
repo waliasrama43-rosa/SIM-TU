@@ -1,5 +1,5 @@
 <!-- users.html — Kepala TU only -->
-<div id="usersPage">
+<template id="usersPage">
 
   <div class="page-header">
     <div><h2>👥 Kelola User</h2><p>Manajemen akun staf TU — maks 2 akun per jenjang</p></div>
@@ -95,7 +95,7 @@
     </div>
   </template>
 
-</div>
+</template>
 
 <script>
 registerPage('users', async function(container) {
@@ -103,7 +103,7 @@ registerPage('users', async function(container) {
     container.innerHTML = `<div class="loading-page"><p>⛔ Akses ditolak. Hanya Kepala TU.</p></div>`;
     return;
   }
-  container.innerHTML = document.getElementById('usersPage').outerHTML;
+  container.innerHTML = document.getElementById('usersPage').innerHTML;
   await loadUsers();
 });
 

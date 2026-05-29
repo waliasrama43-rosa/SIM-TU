@@ -1,5 +1,5 @@
 <!-- surat-keluar.html -->
-<div id="suratKeluarPage">
+<template id="suratKeluarPage">
 
   <div class="page-header">
     <div><h2>📤 Surat Keluar</h2><p>Buat & arsip surat keluar dari template</p></div>
@@ -84,13 +84,13 @@
     </div>
   </template>
 
-</div>
+</template>
 
 <script>
 let _skSelectedTpl = null;
 
 registerPage('surat-keluar', async function(container) {
-  container.innerHTML = document.getElementById('suratKeluarPage').outerHTML;
+  container.innerHTML = document.getElementById('suratKeluarPage').innerHTML;
   const now = new Date();
   document.getElementById('skFilterBulan').value = now.getMonth() + 1;
   document.getElementById('skFilterTahun').value = now.getFullYear();
