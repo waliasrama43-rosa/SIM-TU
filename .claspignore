@@ -1,0 +1,8 @@
+# File yang TIDAK ikut di-push ke GAS
+# (pola relatif terhadap rootDir = src)
+**/*.css
+**/*.md
+../docs/**
+../scripts/**
+../README.md
+../.git/**
