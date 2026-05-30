@@ -11,7 +11,10 @@
  */
 
 function initSistem() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  if (!SPREADSHEET_ID) {
+    throw new Error('⚠️ Isi dulu SPREADSHEET_ID di Code.gs dengan ID Google Spreadsheet database Anda, lalu clasp push & jalankan lagi.');
+  }
+  const ss = SpreadsheetApp.openById(SPREADSHEET_ID);
   Logger.log('🚀 Memulai inisialisasi SIM-TU...');
 
   _buatSheetConfig(ss);
